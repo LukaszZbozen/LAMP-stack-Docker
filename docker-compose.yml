@@ -1,0 +1,39 @@
+version: '3'
+
+services: 
+    # PHP image 7.4-fpm
+    web:
+        build: 
+            context: ./docker
+            dockerfile: php.Dockerfile
+        container_name: docker-php
+        volumes: 
+            - ./www:/var/www/html
+        depends_on: 
+            - mariadb
+    # Latest nginx
+    nginx:
+        image: nginx:latest
+        container_name: docker-nginx
+        ports:
+            - '80:80'
+            - '443:443'
+        links:
+            - 'web'
+        volumes: 
+            - 'src:/var/www/html'
+            - './config/nginx:/etc/nginx/conf.d'
+        depends_on: 
+            - web
+    # MariaDB
+    mariadb:
+        # Image == version
+        image: mariadb:5.5.68
+        # Name of container
+        container_name: docker-MariaDB
+        restart: 'always'
+        environment: 
+            MYSQL_ROOT_PASSWORD: password
+        volumes: 
+            - ./data:/var/lib/mysql
+        
